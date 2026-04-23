@@ -11,7 +11,16 @@ services:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/init-microservices.sql:/docker-entrypoint-initdb.d/init-microservices.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$${MYSQL_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-uroot",
+          "-p$${MYSQL_ROOT_PASSWORD}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -57,22 +66,6 @@ services:
       mysql:
         condition: service_healthy
 
-  frontend:
-    build:
-      context: ./skillhub-front
-      dockerfile: Dockerfile
-    container_name: skillhub-frontend
-    profiles: ["frontend"]
-    ports:
-      - "${FRONTEND_PORT:-5173}:5173"
-    volumes:
-      - ./skillhub-front:/app
-      - frontend-node-modules:/app/node_modules
-    depends_on:
-      backend:
-        condition: service_started
-
 volumes:
   mysql-data:
   backend-vendor:
-  frontend-node-modules:
