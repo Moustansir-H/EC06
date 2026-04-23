@@ -3,16 +3,15 @@ services:
     image: mysql:8.4
     container_name: skillhub-mysql
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-skillhub}
-      MYSQL_USER: ${DB_USERNAME:-skillhub}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-skillhub}
+      MYSQL_DATABASE: ${BACK_DB_DATABASE:-db-skillhub-back}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init-microservices.sql:/docker-entrypoint-initdb.d/init-microservices.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u$${MYSQL_USER}", "-p$${MYSQL_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -26,6 +25,9 @@ services:
       APP_MASTER_KEY: ${APP_MASTER_KEY:-change-me-master-key}
       BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8000/api}
       AUTH_INTERNAL_SYNC_SECRET: ${AUTH_INTERNAL_SYNC_SECRET:-change-me-sync-secret}
+      AUTH_DB_URL: ${AUTH_DB_URL:-jdbc:mysql://mysql:3306/db-skillhub-auth?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      AUTH_DB_USERNAME: ${AUTH_DB_USERNAME:-root}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD:-}
     ports:
       - "${AUTH_PORT:-8080}:8080"
     depends_on:
@@ -39,11 +41,11 @@ services:
     container_name: skillhub-backend
     environment:
       DB_CONNECTION: ${DB_CONNECTION:-mysql}
-      DB_HOST: ${DB_HOST:-mysql}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_DATABASE: ${DB_DATABASE:-skillhub}
-      DB_USERNAME: ${DB_USERNAME:-skillhub}
-      DB_PASSWORD: ${DB_PASSWORD:-skillhub}
+      DB_HOST: ${BACK_DB_HOST:-mysql}
+      DB_PORT: ${BACK_DB_PORT:-3306}
+      DB_DATABASE: ${BACK_DB_DATABASE:-db-skillhub-back}
+      DB_USERNAME: ${BACK_DB_USERNAME:-root}
+      DB_PASSWORD: ${BACK_DB_PASSWORD:-}
       AUTH_SERVICE_URL: ${AUTH_SERVICE_URL:-http://auth:8080/api}
       AUTH_INTERNAL_SYNC_SECRET: ${AUTH_INTERNAL_SYNC_SECRET:-change-me-sync-secret}
     ports:
