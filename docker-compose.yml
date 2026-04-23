@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./skillhub-back
+      dockerfile: Dockerfile
+    container_name: skillhub-backend
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./skillhub-back:/var/www/html
+      - backend-vendor:/var/www/html/vendor
+
+  frontend:
+    build:
+      context: ./skillhub-front
+      dockerfile: Dockerfile
+    container_name: skillhub-frontend
+    env_file:
+      - ./.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./skillhub-front:/app
+      - frontend-node-modules:/app/node_modules
+
+volumes:
+  backend-vendor:
+  frontend-node-modules:
