@@ -28,10 +28,8 @@ class ModuleTest extends TestCase
         $formation = $this->formation($formateur);
         Lecon::factory()->count(3)->create(['idFormation' => $formation->id]);
 
-        $token = auth('api')->login($formateur);
-
-        $this->withToken($token)->getJson("/api/formations/{$formation->id}/modules")
-             ->assertStatus(200);
+        $this->actingAs($formateur)->getJson("/api/formations/{$formation->id}/modules")
+            ->assertStatus(200);
     }
 
     public function test_formateur_ne_voit_pas_modules_dun_autre(): void
@@ -40,10 +38,8 @@ class ModuleTest extends TestCase
         $formateur2 = $this->formateur();
         $formation  = $this->formation($formateur1);
 
-        $token = auth('api')->login($formateur2);
-
-        $this->withToken($token)->getJson("/api/formations/{$formation->id}/modules")
-             ->assertStatus(404);
+        $this->actingAs($formateur2)->getJson("/api/formations/{$formation->id}/modules")
+            ->assertStatus(404);
     }
 
     public function test_acces_modules_sans_token(): void
@@ -52,21 +48,20 @@ class ModuleTest extends TestCase
         $formation = $this->formation($formateur);
 
         $this->getJson("/api/formations/{$formation->id}/modules")
-             ->assertStatus(401);
+            ->assertStatus(401);
     }
 
     public function test_formateur_peut_ajouter_module(): void
     {
         $formateur = $this->formateur();
         $formation = $this->formation($formateur);
-        $token     = auth('api')->login($formateur);
 
-        $this->withToken($token)->postJson("/api/formations/{$formation->id}/modules", [
+        $this->actingAs($formateur)->postJson("/api/formations/{$formation->id}/modules", [
             'titre'   => 'Introduction',
             'duree'   => 30,
             'contenu' => 'Contenu du module',
         ])->assertStatus(201)
-          ->assertJsonFragment(['titre' => 'Introduction']);
+            ->assertJsonFragment(['titre' => 'Introduction']);
 
         $this->assertDatabaseHas('lecon', [
             'titre'       => 'Introduction',
@@ -78,9 +73,8 @@ class ModuleTest extends TestCase
     {
         $formateur = $this->formateur();
         $formation = $this->formation($formateur);
-        $token     = auth('api')->login($formateur);
 
-        $this->withToken($token)->postJson("/api/formations/{$formation->id}/modules", [
+        $this->actingAs($formateur)->postJson("/api/formations/{$formation->id}/modules", [
             'duree' => 30,
         ])->assertStatus(422);
     }
@@ -90,9 +84,8 @@ class ModuleTest extends TestCase
         $formateur1 = $this->formateur();
         $formateur2 = $this->formateur();
         $formation  = $this->formation($formateur1);
-        $token      = auth('api')->login($formateur2);
 
-        $this->withToken($token)->postJson("/api/formations/{$formation->id}/modules", [
+        $this->actingAs($formateur2)->postJson("/api/formations/{$formation->id}/modules", [
             'titre' => 'Module intrus',
         ])->assertStatus(404);
     }

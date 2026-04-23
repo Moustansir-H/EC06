@@ -6,156 +6,18 @@ info:
 servers:
   - url: http://localhost:8000
 paths:
+  # AUTHENTIFICATION
+  # L'authentification est gérée par le service Spring Boot skillhub-auth.
+  # Ce service Laravel consomme uniquement les tokens validés par skillhub-auth.
 
- 
-  # AUTH
-  
-
-  /api/login:
-    post:
-      summary: Connexion utilisateur
-      description: Authentifie un utilisateur avec email et mot de passe. Retourne un token JWT.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            example:
-              email: "formateur@test.com"
-              password: "123456"
-      responses:
-        '200':
-          description: Connexion réussie — token JWT retourné
-          content:
-            application/json:
-              example:
-                access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-                token_type: "bearer"
-                expires_in: 3600
-                user:
-                  id: 1
-                  nom: "Dupont"
-                  prenom: "Jean"
-                  email: "formateur@test.com"
-                  role: "FORMATEUR"
-        '401':
-          description: Email ou mot de passe incorrect
-          content:
-            application/json:
-              example:
-                error: "Email ou mot de passe incorrect"
-        '500':
-          description: Erreur serveur
-
-  /api/register:
-    post:
-      summary: Inscription utilisateur
-      description: Crée un nouveau compte utilisateur. Le rôle doit être APPRENANT, FORMATEUR ou ADMINISTRATEUR.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            example:
-              nom: "Dupont"
-              prenom: "Jean"
-              email: "formateur@test.com"
-              password: "123456"
-              role: "FORMATEUR"
-      responses:
-        '201':
-          description: Inscription réussie — compte créé et token retourné
-          content:
-            application/json:
-              example:
-                access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-                token_type: "bearer"
-                user:
-                  id: 3
-                  nom: "Dupont"
-                  prenom: "Jean"
-                  email: "formateur@test.com"
-                  role: "FORMATEUR"
-        '422':
-          description: Erreur de validation — champs manquants ou email déjà utilisé
-          content:
-            application/json:
-              example:
-                message: "The email has already been taken."
-                errors:
-                  email:
-                    - "The email has already been taken."
-        '500':
-          description: Erreur serveur
-
-  /api/me:
-    get:
-      summary: Profil de l'utilisateur connecté
-      description: Retourne les informations de l'utilisateur authentifié via son token JWT.
-      responses:
-        '200':
-          description: Profil retourné avec succès
-          content:
-            application/json:
-              example:
-                id: 1
-                nom: "Dupont"
-                prenom: "Jean"
-                email: "formateur@test.com"
-                role: "FORMATEUR"
-                niveauEtude: null
-                certification: null
-                created_at: "2026-03-05T09:43:20.000000Z"
-                updated_at: "2026-03-05T09:43:20.000000Z"
-        '401':
-          description: Token absent ou expiré
-          content:
-            application/json:
-              example:
-                error: "Token absent"
-        '403':
-          description: Token invalide
-          content:
-            application/json:
-              example:
-                error: "Token invalide"
-        '500':
-          description: Erreur serveur
-
-  /api/logout:
-    post:
-      summary: Déconnexion
-      description: Invalide le token JWT de l'utilisateur connecté.
-      responses:
-        '200':
-          description: Déconnexion réussie
-          content:
-            application/json:
-              example:
-                message: "Déconnexion réussie"
-        '401':
-          description: Token absent ou expiré
-          content:
-            application/json:
-              example:
-                error: "Token expiré, veuillez vous reconnecter"
-        '403':
-          description: Token invalide
-          content:
-            application/json:
-              example:
-                error: "Token invalide"
-        '500':
-          description: Erreur serveur
-
-  
   # FORMATIONS
-  
 
   /api/formations:
     get:
       summary: Récupérer mes formations
       description: Retourne uniquement les formations appartenant au formateur connecté.
       responses:
-        '200':
+        "200":
           description: Liste des formations du formateur connecté
           content:
             application/json:
@@ -188,19 +50,19 @@ paths:
                     id: 1
                     nomCategorie: "Développement Web"
                   created_at: "2026-03-05T09:43:28.000000Z"
-        '401':
+        "401":
           description: Token absent ou expiré
           content:
             application/json:
               example:
                 error: "Token absent"
-        '403':
+        "403":
           description: Token invalide
           content:
             application/json:
               example:
                 error: "Token invalide"
-        '500':
+        "500":
           description: Erreur serveur
 
     post:
@@ -222,7 +84,7 @@ paths:
               statut: "publié"
               idCategorie: 1
       responses:
-        '201':
+        "201":
           description: Formation créée avec succès
           content:
             application/json:
@@ -239,19 +101,19 @@ paths:
                 idCategorie: 1
                 created_at: "2026-03-06T10:00:00.000000Z"
                 updated_at: "2026-03-06T10:00:00.000000Z"
-        '401':
+        "401":
           description: Token absent ou expiré
           content:
             application/json:
               example:
                 error: "Token absent"
-        '403':
+        "403":
           description: Token invalide
           content:
             application/json:
               example:
                 error: "Token invalide"
-        '422':
+        "422":
           description: Erreur de validation — titre manquant ou idCategorie invalide
           content:
             application/json:
@@ -262,7 +124,7 @@ paths:
                     - "The titre field is required."
                   idCategorie:
                     - "The selected id categorie is invalid."
-        '500':
+        "500":
           description: Erreur serveur
 
   /api/formations/{id}:
@@ -286,7 +148,7 @@ paths:
               prix: 99.99
               statut: "publié"
       responses:
-        '200':
+        "200":
           description: Formation modifiée avec succès
           content:
             application/json:
@@ -306,25 +168,25 @@ paths:
                   nomCategorie: "Développement Web"
                 created_at: "2026-03-05T09:43:28.000000Z"
                 updated_at: "2026-03-06T11:00:00.000000Z"
-        '401':
+        "401":
           description: Token absent ou expiré
           content:
             application/json:
               example:
                 error: "Token absent"
-        '403':
+        "403":
           description: Token invalide
           content:
             application/json:
               example:
                 error: "Token invalide"
-        '404':
+        "404":
           description: Formation non trouvée ou n'appartient pas au formateur connecté
           content:
             application/json:
               example:
                 error: "Formation non trouvée"
-        '422':
+        "422":
           description: Erreur de validation
           content:
             application/json:
@@ -333,7 +195,7 @@ paths:
                 errors:
                   titre:
                     - "The titre field is required."
-        '500':
+        "500":
           description: Erreur serveur
 
     delete:
@@ -348,43 +210,41 @@ paths:
             type: integer
           example: 1
       responses:
-        '200':
+        "200":
           description: Formation supprimée avec succès
           content:
             application/json:
               example:
                 message: "Formation supprimée"
-        '401':
+        "401":
           description: Token absent ou expiré
           content:
             application/json:
               example:
                 error: "Token absent"
-        '403':
+        "403":
           description: Token invalide
           content:
             application/json:
               example:
                 error: "Token invalide"
-        '404':
+        "404":
           description: Formation non trouvée ou n'appartient pas au formateur connecté
           content:
             application/json:
               example:
                 error: "Formation non trouvée"
-        '500':
+        "500":
           description: Erreur serveur
 
- 
   # CATEGORIES
- 
 
   /api/categories:
     get:
       summary: Récupérer toutes les catégories
       description: Retourne la liste de toutes les catégories de formations disponibles.
       responses:
-        '200':
+        "200":
           description: Liste des catégories retournée avec succès
           content:
             application/json:
@@ -401,17 +261,17 @@ paths:
                   nomCategorie: "Marketing"
                   created_at: "2026-02-05T07:07:15.000000Z"
                   updated_at: "2026-02-05T07:07:15.000000Z"
-        '401':
+        "401":
           description: Token absent ou expiré
           content:
             application/json:
               example:
                 error: "Token absent"
-        '403':
+        "403":
           description: Token invalide
           content:
             application/json:
               example:
                 error: "Token invalide"
-        '500':
+        "500":
           description: Erreur serveur

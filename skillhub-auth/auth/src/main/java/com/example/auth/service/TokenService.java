@@ -27,7 +27,15 @@ public class TokenService {
         String tokenValue = UUID.randomUUID().toString();
 
         authTokenRepository.save(new AuthToken(user, tokenValue, expiresAt));
-        return new LoginResult(tokenValue, expiresAt, user.getEmail());
+        return new LoginResult(
+            tokenValue,
+            expiresAt,
+            user.getEmail(),
+            user.getRole(),
+            user.getNom(),
+            user.getPrenom(),
+            user.getBackendUserId()
+        );
     }
 
     public User authenticate(String tokenValue) {

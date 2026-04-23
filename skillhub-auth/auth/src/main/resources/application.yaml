@@ -19,7 +19,10 @@ spring:
 
 auth:
   security:
-    server-master-key: tp3-demo-server-master-key
+    master-key: ${APP_MASTER_KEY:tp3-demo-server-master-key}
     timestamp-window-seconds: 60
     nonce-ttl-seconds: 120
     token-ttl-seconds: 900
+  backend-sync:
+    base-url: ${BACKEND_API_URL:http://127.0.0.1:8000/api}
+    sync-secret: ${AUTH_INTERNAL_SYNC_SECRET:skillhub-sync-secret}

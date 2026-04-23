@@ -5,17 +5,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "auth.security")
 public class AuthSecurityProperties {
 
-    private String serverMasterKey = "change-me-in-production";
+    private String masterKey = "change-me-in-production";
     private long timestampWindowSeconds = 60;
     private long nonceTtlSeconds = 120;
     private long tokenTtlSeconds = 900;
 
-    public String getServerMasterKey() {
-        return serverMasterKey;
+    public String getMasterKey() {
+        return masterKey;
     }
 
-    public void setServerMasterKey(String serverMasterKey) {
-        this.serverMasterKey = serverMasterKey;
+    public void setMasterKey(String masterKey) {
+        this.masterKey = masterKey;
     }
 
     public long getTimestampWindowSeconds() {

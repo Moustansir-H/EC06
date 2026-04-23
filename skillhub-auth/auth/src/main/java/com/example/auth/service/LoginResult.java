@@ -2,6 +2,14 @@ package com.example.auth.service;
 
 import java.time.LocalDateTime;
 
-public record LoginResult(String accessToken, LocalDateTime expiresAt, String email) {
+public record LoginResult(
+	String accessToken,
+	LocalDateTime expiresAt,
+	String email,
+	String role,
+	String nom,
+	String prenom,
+	Long backendUserId
+) {
 }
 

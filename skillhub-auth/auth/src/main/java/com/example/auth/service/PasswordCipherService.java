@@ -23,7 +23,7 @@ public class PasswordCipherService {
     private final SecretKeySpec secretKey;
 
     public PasswordCipherService(AuthSecurityProperties securityProperties) {
-        this.secretKey = new SecretKeySpec(buildKeyBytes(securityProperties.getServerMasterKey()), "AES");
+        this.secretKey = new SecretKeySpec(buildKeyBytes(securityProperties.getMasterKey()), "AES");
     }
 
     public String encrypt(String plainPassword) {

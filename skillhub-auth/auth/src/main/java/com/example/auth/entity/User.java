@@ -18,6 +18,18 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String role;
+
+    @Column(nullable = false)
+    private String nom;
+
+    @Column(nullable = false)
+    private String prenom;
+
+    @Column(nullable = false)
+    private Long backendUserId;
+
     @Column(name = "password_encrypted", nullable = false)
     private String passwordEncrypted;
 
@@ -32,8 +44,16 @@ public class User {
     public User() {}
 
     public User(String email, String passwordEncrypted) {
+        this(email, passwordEncrypted, "APPRENANT", "", "", 0L);
+    }
+
+    public User(String email, String passwordEncrypted, String role, String nom, String prenom, Long backendUserId) {
         this.email = email;
         this.passwordEncrypted = passwordEncrypted;
+        this.role = role;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.backendUserId = backendUserId;
         this.failedAttempts = 0;
         this.createdAt = LocalDateTime.now();
     }

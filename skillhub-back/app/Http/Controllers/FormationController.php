@@ -33,7 +33,7 @@ class FormationController extends Controller
     // GET /api/formations : formations du formateur connecté
     public function index()
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formations = Formation::with('categorie')
             ->where('idUtilisateur', $user->id)
@@ -55,7 +55,7 @@ class FormationController extends Controller
             'idCategorie'  => 'nullable|exists:categorieformation,id',
         ]);
 
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formation = Formation::create([
             'titre'         => $request->titre,
@@ -90,7 +90,7 @@ class FormationController extends Controller
             'idCategorie'  => 'nullable|exists:categorieformation,id',
         ]);
 
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formation = Formation::where('id', $id)
             ->where('idUtilisateur', $user->id)
@@ -117,7 +117,7 @@ class FormationController extends Controller
     // DELETE /api/formations/{id} : supprimer une formation
     public function destroy($id)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formation = Formation::where('id', $id)
             ->where('idUtilisateur', $user->id)
@@ -146,7 +146,7 @@ class FormationController extends Controller
     // GET /api/formations/{id}/modules : modules de la formation du formateur connecté
     public function modulesIndex($id)
     {
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formation = Formation::where('id', $id)
             ->where('idUtilisateur', $user->id)
@@ -168,7 +168,7 @@ class FormationController extends Controller
             'contenu' => 'nullable|string',
         ]);
 
-        $user = auth('api')->user();
+        $user = auth()->user();
 
         $formation = Formation::where('id', $id)
             ->where('idUtilisateur', $user->id)

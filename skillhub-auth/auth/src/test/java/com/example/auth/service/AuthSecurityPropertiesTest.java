@@ -10,7 +10,7 @@ class AuthSecurityPropertiesTest {
     void testDefaultValues() {
         AuthSecurityProperties props = new AuthSecurityProperties();
 
-        assertEquals("change-me-in-production", props.getServerMasterKey());
+        assertEquals("change-me-in-production", props.getMasterKey());
         assertEquals(60, props.getTimestampWindowSeconds());
         assertEquals(120, props.getNonceTtlSeconds());
         assertEquals(900, props.getTokenTtlSeconds());
@@ -20,12 +20,12 @@ class AuthSecurityPropertiesTest {
     void testSettersAndGetters() {
         AuthSecurityProperties props = new AuthSecurityProperties();
 
-        props.setServerMasterKey("new-key");
+        props.setMasterKey("new-key");
         props.setTimestampWindowSeconds(120);
         props.setNonceTtlSeconds(240);
         props.setTokenTtlSeconds(1800);
 
-        assertEquals("new-key", props.getServerMasterKey());
+        assertEquals("new-key", props.getMasterKey());
         assertEquals(120, props.getTimestampWindowSeconds());
         assertEquals(240, props.getNonceTtlSeconds());
         assertEquals(1800, props.getTokenTtlSeconds());

@@ -31,8 +31,17 @@ public class AuthService {
     private final HmacProofService hmacProofService;
     private final TokenService tokenService;
     private final AuthSecurityProperties securityProperties;
+    private final BackendSyncService backendSyncService;
 
-    public User register(String email, String password) {
+    public User register(String nom, String prenom, String email, String password, String role) {
+
+        if (nom == null || nom.isBlank()) {
+            throw new InvalidInputException("Nom obligatoire");
+        }
+
+        if (prenom == null || prenom.isBlank()) {
+            throw new InvalidInputException("Prenom obligatoire");
+        }
 
         if (email == null || email.isBlank()) {
             throw new InvalidInputException("Email obligatoire");
@@ -46,11 +55,20 @@ public class AuthService {
             throw new InvalidInputException("Mot de passe invalide: 12+ caractères, majuscule, minuscule, chiffre, caractère spécial requis");
         }
 
+        String normalizedRole = role == null ? "APPRENANT" : role.trim().toUpperCase();
+        if (!normalizedRole.equals("APPRENANT")
+                && !normalizedRole.equals("FORMATEUR")
+                && !normalizedRole.equals("ADMINISTRATEUR")) {
+            throw new InvalidInputException("Role invalide");
+        }
+
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResourceConflictException("Email déjà utilisé");
         }
 
-        User user = new User(email, passwordCipherService.encrypt(password));
+        Long backendUserId = backendSyncService.syncUser(email, nom, prenom, normalizedRole, password);
+
+        User user = new User(email, passwordCipherService.encrypt(password), normalizedRole, nom, prenom, backendUserId);
         User saved = userRepository.save(user);
         log.info("Inscription réussie pour {}", email);
         return saved;

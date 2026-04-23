@@ -1,6 +1,9 @@
-import api from "./axios";
+import authClient from "./authClient";
 
 const TOKEN_KEYS = ["access_token", "token", "auth_token"];
+const AUTH_LOGIN_PATH = "/auth/login";
+const AUTH_REGISTER_PATH = "/auth/register";
+const AUTH_ME_PATH = "/me";
 
 function isRecord(value) {
   return value !== null && typeof value === "object";
@@ -69,6 +72,52 @@ function extractToken(data) {
   );
 }
 
+function bytesToBase64(bytes) {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(bytes).toString("base64");
+  }
+
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
+function createNonce() {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function computeHmacBase64(password, message) {
+  if (!globalThis.crypto?.subtle) {
+    throw new Error("Le navigateur ne supporte pas le login SSO.");
+  }
+
+  const encoder = new TextEncoder();
+  const keyMaterial = await globalThis.crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+
+  const signature = await globalThis.crypto.subtle.sign(
+    "HMAC",
+    keyMaterial,
+    encoder.encode(message),
+  );
+
+  return bytesToBase64(new Uint8Array(signature));
+}
+
 function extractUser(data, fallbackUser) {
   if (data?.user && typeof data.user === "object") return data.user;
   if (data?.data?.user && typeof data.data.user === "object")
@@ -111,7 +160,18 @@ export const clearSession = () => {
 };
 
 export const login = async (email, password) => {
-  const response = await api.post("/login", { email, password });
+  const nonce = createNonce();
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${email}:${nonce}:${timestamp}`;
+  const hmac = await computeHmacBase64(password, message);
+
+  const response = await authClient.post(AUTH_LOGIN_PATH, {
+    email,
+    nonce,
+    timestamp,
+    hmac,
+  });
+
   const headerToken =
     extractBearerToken(response.headers?.authorization) ||
     extractBearerToken(response.headers?.Authorization);
@@ -131,7 +191,7 @@ export const login = async (email, password) => {
 };
 
 export const register = async ({ nom, prenom, email, password, role }) => {
-  const { data } = await api.post("/register", {
+  const { data } = await authClient.post(AUTH_REGISTER_PATH, {
     nom,
     prenom,
     email,
@@ -139,10 +199,22 @@ export const register = async ({ nom, prenom, email, password, role }) => {
     role,
   });
 
-  return data?.user ?? null;
+  return data?.user ?? data ?? null;
 };
 
 export const logout = async () => {
-  await api.post("/logout");
   clearSession();
+};
+
+export const fetchCurrentSession = async () => {
+  const token = getToken();
+  if (!token) {
+    return null;
+  }
+
+  const response = await authClient.get(AUTH_ME_PATH, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return response.data ?? null;
 };

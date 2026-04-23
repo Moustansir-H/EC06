@@ -4,6 +4,7 @@ import com.example.auth.entity.User;
 import com.example.auth.repository.AuthNonceRepository;
 import com.example.auth.repository.AuthTokenRepository;
 import com.example.auth.repository.UserRepository;
+import com.example.auth.service.BackendSyncService;
 import com.example.auth.service.HmacProofService;
 import com.example.auth.service.PasswordCipherService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,7 +47,7 @@ class AuthControllerTest {
 
     private static final String JSON_EMAIL = "$.email";
     private static final String JSON_MESSAGE = "$.message";
-    private static final String JSON_ACCESS_TOKEN = "$.accessToken";
+    private static final String JSON_ACCESS_TOKEN = "$.access_token";
 
     private static final String TEST_EMAIL = "test@example.com";
     private static final String SECOND_EMAIL = "other@example.com";
@@ -69,6 +73,9 @@ class AuthControllerTest {
     private final PasswordCipherService passwordCipherService;
     private final HmacProofService hmacProofService;
 
+    @MockBean
+    private BackendSyncService backendSyncService;
+
     @Autowired
     AuthControllerTest(
             MockMvc mockMvc,
@@ -93,6 +100,7 @@ class AuthControllerTest {
         authNonceRepository.deleteAllInBatch();
         authTokenRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
+        when(backendSyncService.syncUser(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(1L);
     }
 
     @Test
@@ -100,6 +108,9 @@ class AuthControllerTest {
         mockMvc.perform(postJson(REGISTER_URL, registerRequest(TEST_EMAIL, VALID_PASSWORD)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath(JSON_EMAIL).value(TEST_EMAIL))
+                .andExpect(jsonPath("$.nom").value("Test"))
+                .andExpect(jsonPath("$.prenom").value("User"))
+                .andExpect(jsonPath("$.role").value("APPRENANT"))
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.createdAt").exists())
                 .andExpect(jsonPath("$.password").doesNotExist())
@@ -225,7 +236,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString()).get("accessToken").asText();
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString()).get("access_token").asText();
 
         mockMvc.perform(get(ME_URL).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -325,8 +336,11 @@ class AuthControllerTest {
 
     private Map<String, String> registerRequest(String email, String password) {
         return Map.of(
+                "nom", "Test",
+                "prenom", "User",
                 EMAIL_KEY, email,
-                PASSWORD_KEY, password
+                PASSWORD_KEY, password,
+                "role", "APPRENANT"
         );
     }
 

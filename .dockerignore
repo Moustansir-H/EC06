@@ -13,3 +13,4 @@ skillhub-back/storage/framework/cache
 skillhub-back/storage/framework/sessions
 skillhub-back/storage/framework/views
 skillhub-front/dist
+skillhub-auth/auth/target

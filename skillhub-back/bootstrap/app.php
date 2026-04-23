@@ -2,9 +2,6 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,18 +13,4 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (): void {
         //
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Throwable $e) {
-            if ($e instanceof TokenInvalidException) {
-                return response()->json(['error' => 'Token invalide'], 403);
-            }
-
-            if ($e instanceof TokenExpiredException) {
-                return response()->json(['error' => 'Token expiré, veuillez vous reconnecter'], 401);
-            }
-
-            if ($e instanceof JWTException) {
-                return response()->json(['error' => 'Token absent'], 401);
-            }
-        });
-    })->create();
+    ->withExceptions(function (Exceptions $exceptions): void {})->create();

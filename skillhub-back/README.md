@@ -1,12 +1,12 @@
 # SkillHub - Backend
 
 Plateforme collaborative mettant en relation formateurs et apprenants.
-Le backend permet de gerer l'authentification et les operations metier autour des formations.
+Le backend gere les operations metier autour des formations.
+L'authentification est deleguee au service `skillhub-auth` (Spring Boot).
 
 ## Technologies utilisees
 
 - Laravel 12
-- JWT Authentication (`tymon/jwt-auth`)
 - MySQL
 - PHPUnit pour les tests
 
@@ -30,21 +30,20 @@ cp .env.example .env
 # 3) Generer la cle d'application
 php artisan key:generate
 
-# 4) Generer la cle JWT
-php artisan jwt:secret
-
-# 5) Configurer la base de donnees dans .env
+# 4) Configurer la base de donnees dans .env
 # DB_CONNECTION=mysql
 # DB_HOST=127.0.0.1
 # DB_PORT=3306
 # DB_DATABASE=skillhub
 # DB_USERNAME=root
 # DB_PASSWORD=
+# AUTH_SERVICE_URL=http://127.0.0.1:8080/api
+# AUTH_INTERNAL_SYNC_SECRET=skillhub-sync-secret
 
-# 6) Lancer les migrations
+# 5) Lancer les migrations
 php artisan migrate
 
-# 7) Demarrer le serveur
+# 6) Demarrer le serveur
 php artisan serve
 ```
 
@@ -60,11 +59,12 @@ Le fichier `.env.testing` utilise SQLite en memoire afin de ne pas impacter la b
 
 ## Authentification
 
-L'API utilise JWT (JSON Web Token).
+L'API `skillhub-back` ne genere plus de token.
+La validation du token est faite en appelant `skillhub-auth` via `AUTH_SERVICE_URL`.
 
-1. Se connecter via `POST /api/login` pour obtenir un token.
+1. Se connecter via `skillhub-auth` (`POST /api/auth/login`) pour obtenir un token.
 2. Inclure le token dans chaque requete : `Authorization: Bearer <token>`.
-3. Le token est stocke cote frontend et ajoute automatiquement aux requetes API.
+3. Le backend verifie ce token aupres de `skillhub-auth` via `GET /api/me`.
 
 ## Comptes formateur (developpement)
 

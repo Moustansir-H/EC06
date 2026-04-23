@@ -1,26 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\AtelierController;
-
-// Routes publiques
-Route::post('/login',    [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+use App\Http\Controllers\InternalUserSyncController;
 
 // Catalogue & logs d'activité (équivalent skillhub : atelierControl/recup_liste_atelier, log_activity)
 Route::get('/ateliers', [AtelierController::class, 'liste']);
 Route::get('/ateliers/{id}', [AtelierController::class, 'detail']);
 Route::post('/activity-log', [AtelierController::class, 'logActivity']);
 
-// Routes protégées
-Route::middleware('auth:api')->group(function () {
+// Route interne: synchronisation des utilisateurs depuis skillhub-auth
+Route::post('/internal/users/sync', [InternalUserSyncController::class, 'sync']);
 
-    // Route pour récupérer l’utilisateur connecté
-    Route::get('/me',       [AuthController::class, 'me']);
-    // Route pour se déconnecter (invalider le token)
-    Route::post('/logout',  [AuthController::class, 'logout']);
+// Routes protégées (authentification gérée par skillhub-auth)
+Route::middleware(\App\Http\Middleware\JwtTokenMiddleware::class)->group(function () {
 
     // Formations du formateur connecté
     Route::get('/formations',       [FormationController::class, 'index']);

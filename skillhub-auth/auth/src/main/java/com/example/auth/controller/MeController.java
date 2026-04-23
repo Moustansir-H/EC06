@@ -30,7 +30,11 @@ public class MeController {
 
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),
+            "backendUserId", user.getBackendUserId(),
                 "email", user.getEmail(),
+            "role", user.getRole(),
+            "nom", user.getNom(),
+            "prenom", user.getPrenom(),
                 "createdAt", user.getCreatedAt()
         ));
     }
