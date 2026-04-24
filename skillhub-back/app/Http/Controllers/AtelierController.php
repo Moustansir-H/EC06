@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Formation;
 use App\Services\ActivityLogService;
+use App\Services\InscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Schema;
 class AtelierController extends Controller
 {
     public function __construct(
-        private ActivityLogService $activityLog
+        private ActivityLogService $activityLog,
+        private InscriptionService $inscriptionService
     ) {}
 
 
@@ -185,6 +187,12 @@ class AtelierController extends Controller
         $message = 'Vous etes deja inscrit a cette formation.';
 
         if (! $already) {
+            if ($this->inscriptionService->hasReachedActiveInscriptionsLimit((int) $user->id)) {
+                return response()->json([
+                    'message' => 'Limite atteinte : vous avez deja 5 inscriptions actives.',
+                ], 400);
+            }
+
             DB::table('inscription')->insert($this->buildInscriptionPayload((int) $user->id, (int) $formation->id));
 
             // MongoDB — historisation
