@@ -76,7 +76,10 @@ public class AuthService {
 
     }
 
-    @Transactional
+        @Transactional(noRollbackFor = {
+            AuthenticationFailedException.class,
+            AccountLockedException.class
+        })
     public LoginResult loginWithProof(String email, String nonce, Long timestamp, String hmac) {
         if (email == null || email.isBlank() || nonce == null || nonce.isBlank() || timestamp == null || hmac == null || hmac.isBlank()) {
             throw new InvalidInputException("Email, nonce, timestamp et hmac obligatoires");
