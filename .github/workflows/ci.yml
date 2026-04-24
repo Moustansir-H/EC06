@@ -107,6 +107,10 @@ jobs:
         working-directory: skillhub-auth/auth
         run: mvn clean test jacoco:report
 
+      - name: Prepare Java dependencies for Sonar
+        working-directory: skillhub-auth/auth
+        run: mvn -q -DskipTests dependency:copy-dependencies -DoutputDirectory=target/dependency
+
       - name: Run Sonar scanner
         uses: SonarSource/sonarqube-scan-action@v2
         env:

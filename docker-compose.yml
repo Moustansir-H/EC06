@@ -55,7 +55,7 @@ services:
       DB_DATABASE: ${BACK_DB_DATABASE:-db-skillhub-back}
       DB_USERNAME: ${BACK_DB_USERNAME:-root}
       DB_PASSWORD: ${BACK_DB_PASSWORD:-}
-      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL:-http://auth:8080/api}
+      SSO_SERVICE_URL: ${SSO_SERVICE_URL:-http://auth:8080/api}
       AUTH_INTERNAL_SYNC_SECRET: ${AUTH_INTERNAL_SYNC_SECRET:-change-me-sync-secret}
     ports:
       - "${BACKEND_PORT:-8000}:8000"

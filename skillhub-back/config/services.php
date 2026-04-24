@@ -36,7 +36,7 @@ return [
     ],
 
     'sso' => [
-        'base_url' => env('SSO_SERVICE_URL', env('AUTH_SERVICE_URL', 'http://127.0.0.1:8080/api')),
+        'base_url' => env('SSO_SERVICE_URL', 'http://127.0.0.1:8080/api'),
         'allowed_hosts' => array_filter(array_map('trim', explode(',', (string) env('SSO_ALLOWED_HOSTS', '127.0.0.1,localhost,auth,skillhub-auth')))),
     ],
 
