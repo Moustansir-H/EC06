@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Formation;
 use App\Models\CategorieFormation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 class AtelierTest extends TestCase
 {
@@ -92,6 +93,30 @@ class AtelierTest extends TestCase
             ->postJson("/api/ateliers/{$formation->id}/inscription");
 
         $this->assertContains($response->status(), [201, 500]);
+    }
+
+    public function test_limite_de_cinq_inscriptions_actives_bloque_une_nouvelle_inscription()
+    {
+        $user = $this->actingAsApprenant();
+        $formations = Formation::factory()->count(6)->create();
+
+        foreach ($formations->take(5) as $formation) {
+            DB::table('inscription')->insert([
+                'idUtilisateur' => $user->id,
+                'idFormation' => $formation->id,
+                'dateInscription' => now()->toDateString(),
+                'statut' => 'en-cours',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->postJson("/api/ateliers/{$formations[5]->id}/inscription")
+            ->assertStatus(400)
+            ->assertJson([
+                'message' => 'Limite atteinte : vous avez deja 5 inscriptions actives.',
+            ]);
     }
 
     public function test_formateur_ne_peut_pas_sinscrire()
