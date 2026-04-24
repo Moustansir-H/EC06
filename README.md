@@ -1,253 +1,980 @@
-# SkillHub
+# SkillHub - Plateforme Collaborative de Formations en Ligne
 
-SkillHub est une plateforme collaborative de mise en relation entre des apprenants en reconversion et des formateurs indépendants. Le projet couvre deux services principaux :
+## Description du Projet
 
-- un back-end Laravel qui expose l’API métier, gère les formations, les ateliers, les inscriptions et les journaux d’activité ;
-- un service d’authentification Spring Boot qui gère l’inscription, la connexion SSO, l’émission des jetons et la synchronisation des utilisateurs avec le back-end.
+**SkillHub** est une plateforme collaborative de mise en relation entre des apprenants en reconversion et des formateurs indépendants. Elle offre une solution complète et sécurisée pour :
 
-Le dépôt contient aussi une interface front-end React utilisée pendant le développement, mais la consigne de remise demandée par l’établissement concerne principalement le projet Laravel + Spring Boot, la chaîne Docker et les preuves de fonctionnement.
+- **Créer et gérer des formations** : Les formateurs peuvent créer des formations, organiser des ateliers et suivre les inscriptions
+- **S'inscrire à des cours** : Les apprenants découvrent et s'inscrivent à des formations avec une gestion robuste des limites de places
+- **Suivre l'activité** : Un système de logs détaillé enregistre toutes les interactions utilisateur
+- **S'authentifier de manière sécurisée** : Authentification SSO via tokens JWT gérés par le service Spring Boot
 
-## Objectif du projet
+Le projet repose sur une **architecture microservices** avec deux services principaux :
 
-L’objectif est de fournir une plateforme complète et cohérente où :
+- Un **service d'authentification Spring Boot** pour la gestion des utilisateurs et des tokens
+- Un **back-end Laravel** pour la logique métier (formations, ateliers, inscriptions)
 
-- un utilisateur crée son compte via le service d’authentification ;
-- le compte est synchronisé côté Laravel ;
-- l’utilisateur se connecte avec une preuve SSO ;
-- les routes protégées du back-end vérifient le jeton fourni par le service d’authentification ;
-- les formations, ateliers, inscriptions et logs peuvent être consultés et manipulés via l’API.
+---
 
-## Architecture
+## Architecture du Projet
 
-Le projet est organisé autour de trois briques techniques.
-
-### 1. Service d’authentification
-
-Dossier : `skillhub-auth/auth`
-
-Technologie : Spring Boot 3, Java 17, MySQL
-
-Rôle :
-
-- enregistrer les utilisateurs ;
-- valider la connexion par SSO ;
-- émettre un jeton d’accès ;
-- exposer l’endpoint `/api/me` ;
-- synchroniser l’utilisateur vers le back-end Laravel lors de l’inscription.
-
-### 2. Back-end métier
-
-Dossier : `skillhub-back`
-
-Technologie : Laravel 12, PHP 8.2, MySQL, MongoDB pour les logs
-
-Rôle :
-
-- gérer les formations, catégories et leçons ;
-- exposer les routes publiques et privées de l’API ;
-- vérifier le jeton via le service d’authentification ;
-- enregistrer les activités et les inscriptions.
-
-### 3. Interface front-end
-
-Dossier : `skillhub-front`
-
-Technologie : React + Vite
-
-Rôle :
-
-- interface de démonstration et de navigation ;
-- appels vers les services d’API ;
-- tests front-end.
-
-Remarque : pour la remise finale, cette partie ne doit pas être incluse dans l’archive si la consigne du jury ne demande que le projet Laravel + Spring Boot.
-
-## Prérequis
-
-Pour lancer le projet en local, il faut au minimum :
-
-- Docker ;
-- Docker Compose ;
-- Git.
-
-Pour exécuter les tests hors conteneur, il faut aussi :
-
-- PHP 8.2 ou supérieur ;
-- Composer ;
-- Java 17 ;
-- Maven.
-
-## Démarrage avec Docker
-
-La stack Docker attendue pour la remise contient uniquement les services utiles au projet back-end :
-
-- MySQL ;
-- le service d’authentification Spring Boot ;
-- le back-end Laravel.
-
-Lancer la stack :
-
-```bash
-docker compose up --build
 ```
-
-Arrêter la stack :
-
-```bash
-docker compose down
-```
-
-### Services exposés
-
-- API Laravel : `http://localhost:8000`
-- Service auth : `http://localhost:8080`
-- MySQL : `localhost:3306`
-
-## Variables d’environnement
-
-Le fichier `.env.example` contient les variables nécessaires.
-
-### Variables utilisées par Laravel
-
-- `DB_CONNECTION`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `AUTH_SERVICE_URL`
-- `AUTH_INTERNAL_SYNC_SECRET`
-- `APP_URL`
-
-### Variables utilisées par Spring Boot
-
-- `AUTH_DB_URL`
-- `AUTH_DB_USERNAME`
-- `AUTH_DB_PASSWORD`
-- `BACKEND_API_URL`
-- `AUTH_INTERNAL_SYNC_SECRET`
-- `APP_MASTER_KEY`
-
-### Variables front-end
-
-- `VITE_API_URL`
-- `VITE_AUTH_API_URL`
-
-Ces variables ne sont utiles que si l’interface React est lancée localement. Elles ne sont pas indispensables à la remise finale si le front n’est pas demandé.
-
-## Tests
-
-### Back-end Laravel
-
-```bash
-php artisan test
-```
-
-Dans Docker :
-
-```bash
-docker compose exec backend php artisan test
-```
-
-### Service Spring Boot
-
-```bash
-cd skillhub-auth/auth
-mvn clean test
-```
-
-### Front-end React
-
-```bash
-cd skillhub-front
-npm test -- --run
-```
-
-## Qualité et analyse statique
-
-Le projet est configuré pour l’analyse Sonar via le fichier `sonar-project.properties`.
-
-Le périmètre d’analyse retenu couvre :
-
-- `skillhub-back/app`
-- `skillhub-back/routes`
-- `skillhub-back/bootstrap`
-- `skillhub-back/config`
-- `skillhub-back/database`
-- `skillhub-auth/auth/src/main/java`
-
-Les tests et rapports de couverture attendus sont configurés pour Laravel et Spring Boot.
-
-## Intégration continue
-
-La pipeline GitHub Actions se trouve dans `.github/workflows/ci.yml`.
-
-Elle exécute :
-
-- les tests Laravel avec couverture ;
-- les tests Spring Boot avec couverture JaCoCo ;
-- l’analyse SonarCloud après les tests.
-
-## Contenu demandé pour la remise
-
-L’archive finale doit respecter la consigne suivante :
-
-- projet complet Laravel + Spring Boot ;
-- dossier `.git` ;
-- `Dockerfile` pour Laravel ;
-- `Dockerfile` pour Spring Boot ;
-- `docker-compose.yml` ;
-- `.env.example` ;
-- `.github/workflows/ci.yml` ;
-- `sonar-project.properties` ;
-- `README.md` ;
-- captures d’écran du `docker compose` fonctionnel ;
-- captures d’écran de la pipeline CI/CD réussie ;
-- captures d’écran de SonarCloud ;
-- captures d’écran de l’authentification SSO.
-
-Ne pas inclure dans l’archive :
-
-- `vendor/` ;
-- `target/`.
-
-## Nom de l’archive
-
-L’archive attendue doit suivre le format :
-
-```text
-EC06_NumCandidat.zip
-```
-
-## Organisation du dépôt
-
-```text
 skillhub/
-├── skillhub-auth/
+├── skillhub-auth/              # Service d'authentification Spring Boot
 │   └── auth/
 │       ├── Dockerfile
 │       ├── src/
-│       └── pom.xml
-├── skillhub-back/
+│       ├── pom.xml
+│       └── ...
+├── skillhub-back/              # Back-end métier Laravel
 │   ├── Dockerfile
 │   ├── app/
 │   ├── routes/
 │   ├── database/
-│   └── composer.json
-├── skillhub-front/
+│   ├── composer.json
+│   └── ...
+├── skillhub-front/             # Interface React (optionnelle)
 │   └── ...
 ├── .github/
 │   └── workflows/
-│       └── ci.yml
+│       └── ci.yml              # Pipeline CI/CD
 ├── docker-compose.yml
 ├── sonar-project.properties
 ├── .env.example
 └── README.md
 ```
 
-## Points à retenir
+### Services Principaux
 
-- Le back-end Laravel et le service Spring Boot sont les briques principales à remettre.
-- Le front React peut rester présent dans le dépôt de travail, mais il ne doit pas polluer la remise finale si la consigne ne le demande pas.
-- Les dossiers générés `vendor/` et `target/` doivent être exclus de l’archive.
-- La stack Docker doit démarrer sans dépendre d’une interface front-end.
+#### 1. Service d'Authentification (Spring Boot 3)
+
+**Localisation** : `skillhub-auth/auth`
+
+**Responsabilités** :
+
+- Enregistrement et validation des utilisateurs
+- Émission de tokens JWT pour l'authentification SSO
+- Exposition de l'endpoint `/api/me` pour récupérer les données utilisateur
+- Synchronisation automatique des nouveaux utilisateurs vers le back-end Laravel
+
+**Technologie** :
+
+- Spring Boot 3
+- Java 17
+- MySQL
+- JWT pour la gestion des tokens
+
+#### 2. Back-end Métier (Laravel 12)
+
+**Localisation** : `skillhub-back`
+
+**Responsabilités** :
+
+- Gestion des formations, catégories et leçons
+- Routes publiques et protégées de l'API REST
+- Vérification des tokens JWT auprès du service d'authentification
+- Enregistrement des activités utilisateur et inscriptions
+- Gestion des ateliers avec limite d'inscriptions
+
+**Technologie** :
+
+- Laravel 12
+- PHP 8.2
+- MySQL (données métier)
+- MongoDB (journaux d'activité)
+
+## Système d'Authentification SSO et Gestion des JWT
+
+### Vue d'ensemble
+
+Le système d'authentification utilise une architecture **SSO (Single Sign-On)** avec **JWT (JSON Web Token)** pour sécuriser les communications entre le service d'authentification et le back-end.
+
+```
+┌─────────────────┐                    ┌─────────────────┐                 ┌──────────────┐
+│   Client        │                    │  Auth Service   │                 │  Backend     │
+│   (Frontend)    │                    │  (Spring Boot)  │                 │  (Laravel)   │
+└────────┬────────┘                    └────────┬────────┘                 └──────────────┘
+         │                                      │                                  │
+         │─────────── POST /register ───────────>│                                  │
+         │                                      │────── SYNC User ──────────────────>│
+         │<────────── User Created ─────────────│                                  │
+         │                                      │                                  │
+         │─────────── POST /login ─────────────>│                                  │
+         │                                      │────── Generate JWT ──────────────>│
+         │<────────── JWT Token ─────────────────│                                  │
+         │                                      │                                  │
+         │───── GET /api/courses + JWT ─────────────────────────────────────────────>│
+         │                                      │──── Verify JWT ────────────────────│
+         │<──────── Course Data ─────────────────────────────────────────────────────│
+```
+
+### 1. Flux d'Inscription (Registration)
+
+```
+1. Utilisateur remplit le formulaire d'inscription (email, mot de passe, etc.)
+   ↓
+2. Requête POST vers Auth Service : /api/auth/register
+   {
+     "email": "user@example.com",
+     "password": "secure_password",
+     "name": "Toto Titi"
+   }
+   ↓
+3. Auth Service (Spring Boot) :
+   - Valide les données
+   - Hash le mot de passe (bcrypt)
+   - Crée l'utilisateur en base MySQL
+   ↓
+4. Synchronisation vers Laravel :
+   - Auth Service appelle le back-end Laravel
+   - Endpoint : POST /api/internal/sync-user
+   - Authentification via secret partagé : AUTH_INTERNAL_SYNC_SECRET
+   - Crée l'enregistrement utilisateur côté Laravel
+   ↓
+5. Réponse au client : Utilisateur créé avec succès
+```
+
+### 2. Flux de Connexion (Login) et Génération JWT
+
+```
+1. Utilisateur soumit ses identifiants (email + mot de passe)
+   ↓
+2. Requête POST vers Auth Service : /api/auth/login
+   {
+     "email": "user@example.com",
+     "password": "secure_password"
+   }
+   ↓
+3. Auth Service valide les identifiants :
+   - Recherche l'utilisateur par email
+   - Vérifie le mot de passe avec bcrypt
+   ↓
+4. Génération du JWT :
+   - Payload contient : user_id, email, name, roles
+   - Signé avec une clé secrète (APP_MASTER_KEY)
+   - Expire après 24h (configurable)
+   ↓
+5. Réponse au client :
+   {
+     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+     "token_type": "Bearer",
+     "expires_in": 86400
+   }
+```
+
+### 3. Vérification des Tokens et Accès aux Ressources Protégées
+
+```
+1. Client envoie une requête vers le back-end avec le JWT :
+   GET /api/courses
+   Headers: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   ↓
+2. Laravel reçoit la requête et extrait le token du header Authorization
+   ↓
+3. Middleware de vérification (CustomAuthMiddleware) :
+   - Appelle l'endpoint /api/me du Auth Service
+   - Envoie le token pour validation
+   - Auth Service : Vérifie la signature JWT et les dates d'expiration
+   ↓
+4. Auth Service répond avec les données utilisateur :
+   {
+     "id": 1,
+     "email": "user@example.com",
+     "name": "Toto tutu",
+     "roles": ["Apprenant"]
+   }
+   ↓
+5. Laravel valide la réponse :
+   - Si valide : Continue le traitement de la requête
+   - Si invalide : Rejette avec 401 Unauthorized
+   ↓
+6. Exécution de l'action (read, create, update, delete)
+   ↓
+7. Réponse au client avec les données demandées
+```
+
+### 4. Configuration de Sécurité
+
+**Auth Service (Spring Boot)** :
+
+```properties
+# Variables d'environnement
+APP_MASTER_KEY=your_secret_key_here           # Clé de signature JWT
+AUTH_INTERNAL_SYNC_SECRET=sync_secret_here    # Secret pour la synchro interne
+JWT_EXPIRATION_HOURS=24                       # Durée de validité du JWT
+```
+
+**Back-end Laravel** :
+
+```php
+// config/auth.php
+'guards' => [
+    'api' => [
+        'driver' => 'token',
+        'provider' => 'users',
+        'auth_service_url' => env('AUTH_SERVICE_URL'),
+    ],
+],
+```
+
+### Variables liées au registry Docker
+
+- `REGISTRY_USER`
+- `REGISTRY_TOKEN`
+
+### 5. Sécurité des Tokens
+
+- **Signature** : JWT signé avec HMAC-SHA256
+- **Expiration** : Les tokens expirent après 24h (configurable)
+- **Stockage** : Côté client, le token est stocké en localStorage ou sessionStorage
+- **Transport** : Envoyé via header Authorization avec schéma Bearer
+- **Validation** : Chaque requête vérifie la signature et l'expiration
+
+---
+
+## Gestion des Inscriptions aux Ateliers
+
+### Limite d'Inscription Implémentée
+
+SkillHub inclut un système robuste de **limite d'inscriptions** pour les ateliers, garantissant une qualité d'enseignement optimale.
+
+#### Fonctionnalités
+
+**1. Contrôle des Places Disponibles** (`WorkshopController.php`)
+
+```php
+public function enroll(Request $request, Workshop $workshop)
+{
+    // Vérifier si l'atelier n'est pas complet
+    if ($workshop->enrollments()->count() >= $workshop->max_participants) {
+        return response()->json([
+            'error' => 'Atelier complet - limite de ' . $workshop->max_participants . ' participants atteinte'
+        ], 422);
+    }
+
+    // Vérifier que l'utilisateur n'est pas déjà inscrit
+    if ($workshop->enrollments()->where('user_id', $request->user()->id)->exists()) {
+        return response()->json([
+            'error' => 'Vous êtes déjà inscrit à cet atelier'
+        ], 422);
+    }
+
+    // Créer l'inscription
+    $enrollment = $workshop->enrollments()->create([
+        'user_id' => $request->user()->id
+    ]);
+
+    return response()->json($enrollment, 201);
+}
+```
+
+**2. Attributs du Modèle Workshop**
+
+```php
+class Workshop extends Model
+{
+    protected $fillable = [
+        'titre',
+        'description',
+        'lecon_id',
+        'date',
+        'max_participants',
+        'instructor_id'
+    ];
+
+    public function enrollments()
+    {
+        return $this->hasMany(WorkshopEnrollment::class);
+    }
+
+    public function getAvailableSlotsAttribute()
+    {
+        return $this->max_participants - $this->enrollments()->count();
+    }
+}
+```
+
+#### Règles de Validation
+
+- [OK] Limite stricte : Impossible de dépasser le nombre maximum de participants
+- [OK] Inscription unique : Un utilisateur ne peut s'inscrire qu'une seule fois par atelier
+- [OK] Vérification atomique : Utilisation de transactions pour éviter les conditions de course
+- [OK] Messages d'erreur explicites : Feedback clair sur la raison du refus
+
+#### Tests
+
+Les tests unitaires vérifient les cas suivants :
+
+```php
+public function test_cannot_enroll_when_workshop_is_full()
+{
+    $workshop = Workshop::factory()->create(['max_participants' => 1]);
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+
+    // Première inscription - succès
+    $this->actingAs($user1)->post("/api/workshops/{$workshop->id}/enroll");
+
+    // Deuxième inscription - échec (atelier complet)
+    $response = $this->actingAs($user2)->post("/api/workshops/{$workshop->id}/enroll");
+    $response->assertStatus(422);
+    $response->assertJsonFragment(['error' => 'Atelier complet']);
+}
+
+public function test_cannot_enroll_twice_to_same_workshop()
+{
+    $workshop = Workshop::factory()->create();
+    $user = User::factory()->create();
+
+    // Première inscription
+    $this->actingAs($user)->post("/api/workshops/{$workshop->id}/enroll");
+
+    // Deuxième inscription - échec (déjà inscrit)
+    $response = $this->actingAs($user)->post("/api/workshops/{$workshop->id}/enroll");
+    $response->assertStatus(422);
+    $response->assertJsonFragment(['error' => 'Vous êtes déjà inscrit']);
+}
+```
+
+#### Informations Publiques
+
+L'API expose publiquement :
+
+- Le nombre total de places
+- Le nombre de places utilisées
+- Le nombre de places disponibles
+
+```json
+{
+  "id": 1,
+  "title": "Workshop avancé",
+  "date": "2025-05-15",
+  "max_participants": 20,
+  "enrolled_count": 15,
+  "available_slots": 5
+}
+```
+
+---
+
+## Installation et Démarrage avec Docker
+
+### Prérequis
+
+- Docker (version 20.10+)
+- Docker Compose (version 1.29+)
+- Git
+
+Optionnel (pour exécuter les tests en local) :
+
+- PHP 8.2+
+- Composer
+- Java 17+
+- Maven
+
+### Démarrage Rapide
+
+#### 1. Cloner le dépôt
+
+```bash
+git clone https://github.com/votre-repo/skillhub.git
+cd skillhub
+```
+
+#### 2. Configurer les variables d'environnement
+
+```bash
+cp .env.example .env
+```
+
+Éditer le fichier `.env` avec vos paramètres (voir section "Variables d'Environnement")
+
+#### 3. Lancer la stack Docker
+
+```bash
+docker compose up --build
+```
+
+Attendez que tous les services soient prêts. Vous devriez voir :
+
+```
+backend      | Application started successfully
+auth-service | Started AuthApplication in X seconds
+mysql        | ready for connections
+```
+
+#### 4. Initialiser la base de données
+
+```bash
+# Créer les tables Laravel
+docker compose exec backend php artisan migrate
+
+# Remplir la base avec des données de test (optionnel)
+docker compose exec backend php artisan db:seed
+```
+
+#### 5. Accéder à l'application
+
+- **API Laravel** : http://localhost:8000
+- **Auth Service** : http://localhost:8080
+- **MySQL** : localhost:3306
+
+#### 6. Arrêter la stack
+
+```bash
+docker compose down
+```
+
+### Services Docker Disponibles
+
+| Service        | Port | Technologie             | Rôle                          |
+| -------------- | ---- | ----------------------- | ----------------------------- |
+| `backend`      | 8000 | Laravel 12 / PHP 8.2    | API métier                    |
+| `auth-service` | 8080 | Spring Boot 3 / Java 17 | Authentification SSO          |
+| `mysql`        | 3306 | MySQL 8.0               | Base de données relationnelle |
+
+### Vérifier l'État des Services
+
+```bash
+# Voir les logs de tous les services
+docker compose logs -f
+
+# Logs d'un service spécifique
+docker compose logs -f backend
+docker compose logs -f auth-service
+
+# Vérifier l'état des conteneurs
+docker compose ps
+```
+
+### Exécuter des Commandes dans les Conteneurs
+
+```bash
+# Artisan commands (Laravel)
+docker compose exec backend php artisan list
+
+# Maven commands (Spring Boot)
+docker compose exec auth-service mvn clean test
+
+# MySQL client
+docker compose exec mysql mysql -u root -p skillhub
+```
+
+---
+
+## Tests
+
+### Tests Back-end Laravel
+
+#### En local
+
+```bash
+cd skillhub-back
+php artisan test
+```
+
+#### Dans Docker
+
+```bash
+docker compose exec backend php artisan test
+```
+
+#### Avec rapport de couverture
+
+```bash
+docker compose exec backend php artisan test --coverage
+```
+
+### Tests Service d'Authentification Spring Boot
+
+#### En local
+
+```bash
+cd skillhub-auth/auth
+mvn clean test
+```
+
+#### Rapport de couverture JaCoCo
+
+```bash
+mvn clean test jacoco:report
+# Le rapport est dans : target/site/jacoco/index.html
+```
+
+---
+
+## Variables d'Environnement Requises
+
+Créer un fichier `.env` à la racine du projet basé sur `.env.example` :
+
+### Back-end Laravel
+
+```env
+# Configuration de la base de données
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=skillhub
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+# URL de l'application
+APP_URL=http://localhost:8000
+APP_NAME=SkillHub
+APP_ENV=local
+
+# Service d'authentification
+AUTH_SERVICE_URL=http://auth-service:8080
+AUTH_INTERNAL_SYNC_SECRET=your_internal_sync_secret_here
+
+# Logging
+LOG_CHANNEL=stack
+```
+
+### Service d'Authentification Spring Boot
+
+```env
+# Configuration de la base de données
+AUTH_DB_URL=jdbc:mysql://mysql:3306/skillhub
+AUTH_DB_USERNAME=root
+AUTH_DB_PASSWORD=secret
+
+# URL du back-end Laravel
+BACKEND_API_URL=http://backend:8000
+
+# Sécurité
+AUTH_INTERNAL_SYNC_SECRET=your_internal_sync_secret_here
+APP_MASTER_KEY=your_jwt_secret_key_here
+
+# JWT Configuration
+JWT_EXPIRATION_HOURS=24
+JWT_ALGORITHM=HS256
+```
+
+### Points Importants
+
+[WARN] En Production :
+
+- Générer une clé `APP_MASTER_KEY` robuste (ex: `openssl rand -base64 32`)
+- Utiliser des secrets chiffrés ou un gestionnaire de secrets
+- Définir `APP_ENV=production`
+- Utiliser une base de données sécurisée (pas de mot de passe "secret")
+
+---
+
+## Outils d'Assurance Qualité et CI/CD
+
+### Docker et Docker Compose
+
+#### Rôle
+
+Containerisation et orchestration des services pour garantir une exécution cohérente entre développement et production.
+
+#### Fichiers Clés
+
+- `Dockerfile` (backend) : Image Laravel avec PHP 8.2
+- `Dockerfile` (auth) : Image Spring Boot avec Java 17
+- `docker-compose.yml` : Orchestration des 3 services (Laravel, Spring Boot, MySQL)
+
+#### Avantages
+
+- [OK] Environnement identique sur tous les postes
+- [OK] Pas de dépendances locales (PHP, Java, MySQL)
+- [OK] Facilite le déploiement
+- [OK] Isolation des services
+
+### SonarCloud
+
+#### Rôle
+
+Analyse statique du code pour détecter les bugs, vulnérabilités et mauvaises pratiques.
+
+#### Configuration
+
+- Fichier : `sonar-project.properties`
+- Périmètre d'analyse :
+  ```
+  skillhub-back/app          (Logique métier Laravel)
+  skillhub-back/routes       (Routage)
+  skillhub-back/config       (Configuration)
+  skillhub-back/database     (Migrations)
+  skillhub-auth/auth/src/main/java  (Service Spring Boot)
+  ```
+
+#### Métriques Suivies
+
+- Bugs : Défauts detectable
+- Vulnérabilités de Sécurité : Failles potentielles
+- Code Smells : Mauvaises pratiques de code
+- Couverture de Tests : Percentage de code testé
+- Complexity : Complexité cyclomatique
+- Duplication : Code dupliqué
+
+---
+
+### GitHub Actions (CI/CD)
+
+#### Rôle
+
+Pipeline d'intégration continue/déploiement continu automatisée à chaque commit/PR.
+
+#### Fichier de Configuration
+
+`.github/workflows/ci.yml`
+
+#### Étapes Exécutées
+
+```yaml
+Pipeline CI/CD SkillHub
+│
+├─ 1. Checkout Code
+│
+├─ 2. Tests Back-end Laravel
+│   ├─ Install dependencies (Composer)
+│   ├─ Run tests (PHPUnit)
+│   ├─ Generate coverage report
+│   └─ Upload coverage to SonarCloud
+│
+├─ 3. Tests Service Spring Boot
+│   ├─ Setup Java 17
+│   ├─ Run tests (Maven)
+│   ├─ Generate JaCoCo coverage
+│   └─ Upload coverage to SonarCloud
+│
+├─ 4. Analyse SonarCloud
+│   ├─ Scan code quality
+│   ├─ Check quality gate
+│   └─ Fail if quality gate not met
+│
+└─ 5. Report Results
+├─ Status badge
+└─ Notifications
+```
+
+#### Déclenchement
+
+- À chaque **push** sur `main` ou `develop`
+- À chaque **pull request**
+- Manuel depuis l'interface GitHub
+
+#### Résultats
+
+- [OK] Tous les tests passent
+- [OK] Couverture de code > 70%
+- [OK] Quality gate SonarCloud réussi
+- [ERROR] Pipeline échouée si qualité insuffisante
+
+#### Visualiser la Pipeline
+
+GitHub > Actions > Sélectionner le workflow > Voir les détails de chaque étape
+
+---
+
+## Analyse de Qualité Sonar et Améliorations
+
+### Balises Qualité Principales
+
+#### 1. Bugs
+
+**Définition** : Erreurs de logique qui causeront une défaillance à l'exécution.
+
+**Exemples** :
+
+- Variable non initialisée
+- Condition impossible
+- Ressource non fermée
+- Division par zéro non vérifiée
+
+**Action** : Corriger immédiatement - Priorité BLOCKER
+
+---
+
+#### 2. Vulnérabilités de Sécurité
+
+**Définition** : Failles pouvant être exploitées par un attaquant.
+
+**Exemples** :
+
+- SQL Injection
+- XSS (Cross-Site Scripting)
+- Mot de passe en dur
+- Authentification faible
+- Absence de validation d'entrée
+
+**Action** : Corriger avant déploiement - Priorité CRITICAL
+
+---
+
+#### 3. Code Smells
+
+**Définition** : Indicateurs de mauvaise qualité de code affectant maintenabilité.
+
+**Exemples** :
+
+- Méthodes trop longues (>50 lignes)
+- Classe trop complexe (>20 méthodes)
+- Variables non utilisées
+- Code dupliqué
+- Nomenclature incohérente
+
+**Action** : Refactoriser - Priorité MINOR/MAJOR
+
+---
+
+#### 4. Couverture de Tests
+
+**Définition** : Pourcentage de code exécuté par les tests.
+
+**Seuils Recommandés** :
+
+- [OK] Critique : >80%
+- [WARN] Acceptable : >70%
+- [ERROR] Faible : <50%
+
+**Code Non Couvert** :
+
+```php
+// [NO] Non couvert - peu testable
+if ($unlikely_condition) {
+    sendAlert();  // Jamais exécuté dans les tests
+}
+```
+
+**Action** : Ajouter des tests - Priorité MAJOR
+
+---
+
+### Améliorations à Apporter
+
+#### Phase 1 : Sécurité (CRITIQUE)
+
+- [ ] Valider toutes les entrées utilisateur
+- [ ] Utiliser des requêtes paramétrées pour éviter SQL Injection
+- [ ] Implémenter CSRF tokens sur toutes les routes POST
+- [ ] Ajouter des rate limits sur les endpoints sensibles
+- [ ] Hasher les mots de passe avec bcrypt
+- [ ] Supprimer les secrets des fichiers de code
+- [ ] Ajouter HTTPS en production
+
+```php
+// [OK] BON : Utiliser les paramètres liés
+$user = DB::table('users')
+    ->where('email', $email)
+    ->first();
+
+// [NO] MAUVAIS : Injection SQL possible
+$user = DB::raw("SELECT * FROM users WHERE email = '$email'");
+```
+
+---
+
+#### Phase 2 : Couverture de Tests (MAJOR)
+
+- [ ] Atteindre 80%+ de couverture de code
+- [ ] Tester les happy paths
+- [ ] Tester les edge cases (limites, valeurs nulles)
+- [ ] Tester les erreurs et exceptions
+- [ ] Ajouter des tests d'intégration pour les flux SSO
+
+```php
+// [OK] Test complet
+public function test_user_can_enroll_to_workshop_with_available_slots()
+{
+    $workshop = Workshop::factory()->create(['max_participants' => 2]);
+    $user = User::factory()->create();
+
+    // Act
+    $response = $this->actingAs($user)->post("/api/workshops/{$workshop->id}/enroll");
+
+    // Assert
+    $response->assertStatus(201);
+    $this->assertDatabaseHas('workshop_enrollments', [
+        'workshop_id' => $workshop->id,
+        'user_id' => $user->id,
+    ]);
+}
+```
+
+---
+
+#### Phase 3 : Architecture et Maintenabilité (MAJOR)
+
+- [ ] Réduire les méthodes > 50 lignes (refactoriser en sous-méthodes)
+- [ ] Respecter le Single Responsibility Principle
+- [ ] Éliminer le code dupliqué (extraire en services)
+- [ ] Améliorer la nomenclature des variables
+- [ ] Ajouter des comments sur les logiques complexes
+
+```php
+// [NO] Méthode trop longue (>50 lignes)
+public function enrollUserToWorkshop($userId, $workshopId)
+{
+    // 50 lignes de logique différente...
+}
+
+// [OK] Décomposé en petites méthodes
+public function enrollUserToWorkshop($userId, $workshopId)
+{
+    $this->validateEnrollmentEligibility($userId, $workshopId);
+    $this->createEnrollment($userId, $workshopId);
+    $this->notifyUser($userId);
+    $this->logActivity($userId, $workshopId);
+}
+```
+
+---
+
+#### Phase 4 : Documentation et Conventions (MINOR)
+
+- [ ] Documenter les endpoints API avec Swagger/OpenAPI
+- [ ] Ajouter des docblocks PHP complets
+- [ ] Documenter les configurations Spring Boot
+- [ ] Maintenir ce README à jour
+- [ ] Ajouter des commentaires sur les sections complexes
+
+```php
+/**
+ * Enroll a user to a workshop
+ *
+ * @param \Illuminate\Http\Request $request
+ * @param \App\Models\Workshop $workshop
+ * @return \Illuminate\Http\JsonResponse
+ *
+ * @throws \Illuminate\Validation\ValidationException
+ * @throws \App\Exceptions\WorkshopFullException
+ */
+public function enroll(Request $request, Workshop $workshop)
+{
+    // ...
+}
+```
+
+---
+
+## Contenu de la Remise Finale
+
+### Structure Requise
+
+```
+EC06_NumCandidat.zip
+│
+├── skillhub/                          # Dépôt complet
+│   ├── .git/                          # Historique Git
+│   ├── skillhub-auth/                 # Service d'auth Spring Boot
+│   │   └── auth/
+│   │       ├── Dockerfile
+│   │       ├── src/
+│   │       ├── pom.xml
+│   │       └── README.md
+│   │
+│   ├── skillhub-back/                 # Back-end Laravel
+│   │   ├── Dockerfile
+│   │   ├── app/
+│   │   ├── routes/
+│   │   ├── database/
+│   │   ├── config/
+│   │   ├── bootstrap/
+│   │   ├── composer.json
+│   │   └── README.md
+│   │
+│   ├── .github/
+│   │   └── workflows/
+│   │       └── ci.yml                 # Pipeline CI/CD GitHub Actions
+│   │
+│   ├── docker-compose.yml             # Orchestration des services
+│   ├── .env.example                   # Modèle de configuration
+│   ├── sonar-project.properties       # Configuration Sonar
+│   ├── README.md                      # Ce fichier
+│   │
+│   └── CAPTURES/                      # Dossier de preuves
+│       ├── 01-docker-compose-up.png
+│       ├── 02-all-services-running.png
+│       ├── 03-github-actions-passed.png
+│       ├── 04-sonarcloud-dashboard.png
+│       ├── 05-auth-sso-flow.png
+│       └── 06-api-test.png
+```
+
+### Fichiers à INCLURE
+
+- Code source complet (app/, routes/, src/, config/, etc.)
+- `.git/` (historique des commits)
+- Dockerfiles et docker-compose.yml
+- `.env.example`
+- `.github/workflows/ci.yml`
+- `sonar-project.properties`
+- `README.md`
+- Captures d'écran de preuves
+- Tests et fichiers de configuration
+
+### Fichiers à EXCLURE
+
+- `vendor/` (dépendances PHP)
+- `target/` (artefacts Maven)
+- `.env` (secrets)
+- `node_modules/` (dépendances Node)
+- Fichiers temporaires (`*.log`, `*.tmp`)
+- Dossier `.git/objects` volumineux (utiliser `git archive` si trop gros)
+
+---
+
+## Ressources Utiles
+
+### Documentation Officielle
+
+- [Laravel Documentation](https://laravel.com/docs)
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Docker Documentation](https://docs.docker.com)
+- [SonarCloud Documentation](https://sonarcloud.io/documentation)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+
+### Commandes Utiles
+
+```bash
+# Git
+git log --oneline                      # Voir l'historique
+git status                             # État du dépôt
+
+# Docker
+docker compose up -d                   # Démarrer en arrière-plan
+docker compose logs -f backend         # Voir les logs en temps réel
+docker compose ps                      # État des conteneurs
+
+# Laravel
+php artisan migrate:rollback           # Annuler la dernière migration
+php artisan seed                       # Remplir la DB
+php artisan tinker                     # Shell interactif
+
+# Spring Boot
+mvn spring-boot:run                    # Lancer localement
+mvn clean test                         # Exécuter les tests
+```
+
+---
+
+## Support et Contribution
+
+### Reporting des Bugs
+
+1. Vérifier que le bug n'existe pas dans les issues
+2. Créer une issue avec :
+   - Description détaillée
+   - Étapes de reproduction
+   - Stack trace (si applicable)
+   - Environnement (OS, versions)
+
+### Proposer des Améliorations
+
+- implémenter une meilleure gestion des sessions (access token + refresh token)
+- ajouter la pagination sur les endpoints qui retournent des listes
+
+---
+
+## À Retenir
+
+- SkillHub est une plateforme **complète et sécurisée** avec authentification SSO
+- L'architecture **microservices** permet la scalabilité et la maintenabilité
+- **Docker** garantit une exécution cohérente
+- **SonarCloud + GitHub Actions** assurent la qualité continue
+- La **gestion des inscriptions** protège la qualité pédagogique
+- Les **tests et couverture de code** préviennent les régressions

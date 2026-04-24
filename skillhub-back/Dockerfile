@@ -1,29 +1,15 @@
-FROM php:8.2-cli
+FROM php:8.2-cli-alpine
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        autoconf \
-        dpkg-dev \
-        file \
-        g++ \
-        gcc \
+RUN apk add --no-cache \
+        $PHPIZE_DEPS \
         git \
-        libc-dev \
-        libonig-dev \
-        libxml2-dev \
-        libzip-dev \
-        make \
-        pkg-config \
-        re2c \
         unzip \
+        libzip-dev \
+        oniguruma-dev \
+        zip \
     && pecl install mongodb \
-    && pecl install pcov \
     && docker-php-ext-enable mongodb \
-    && docker-php-ext-enable pcov \
-    && echo "pcov.enabled=1" > /usr/local/etc/php/conf.d/pcov.ini \
-    && echo "pcov.directory=/var/www/html/app" >> /usr/local/etc/php/conf.d/pcov.ini \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo_mysql mbstring zip
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
