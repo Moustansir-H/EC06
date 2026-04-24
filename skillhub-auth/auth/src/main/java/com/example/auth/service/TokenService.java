@@ -6,6 +6,7 @@ import com.example.auth.exception.AuthenticationFailedException;
 import com.example.auth.repository.AuthTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class TokenService {
     private final AuthTokenRepository authTokenRepository;
     private final AuthSecurityProperties securityProperties;
 
+    @Transactional
     public LoginResult issueToken(User user) {
         LocalDateTime now = LocalDateTime.now();
         authTokenRepository.deleteByExpiresAtBefore(now);
@@ -38,6 +40,7 @@ public class TokenService {
         );
     }
 
+    @Transactional
     public User authenticate(String tokenValue) {
         LocalDateTime now = LocalDateTime.now();
         authTokenRepository.deleteByExpiresAtBefore(now);

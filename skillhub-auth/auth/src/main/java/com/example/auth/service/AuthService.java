@@ -11,6 +11,7 @@ import com.example.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -75,6 +76,7 @@ public class AuthService {
 
     }
 
+    @Transactional
     public LoginResult loginWithProof(String email, String nonce, Long timestamp, String hmac) {
         if (email == null || email.isBlank() || nonce == null || nonce.isBlank() || timestamp == null || hmac == null || hmac.isBlank()) {
             throw new InvalidInputException("Email, nonce, timestamp et hmac obligatoires");
