@@ -383,11 +383,15 @@ class AtelierController extends Controller
         }
 
         try {
-            $authBaseUrl = rtrim((string) env('AUTH_SERVICE_URL', 'http://127.0.0.1:8080/api'), '/');
+            $authMeUrl = $this->resolveAuthMeUrl();
+            if ($authMeUrl === null) {
+                return null;
+            }
+
             $response = Http::timeout(3)
                 ->withToken($request->bearerToken())
                 ->acceptJson()
-                ->get($authBaseUrl . '/me');
+                ->get($authMeUrl);
 
             if (! $response->ok()) {
                 return null;
@@ -402,6 +406,38 @@ class AtelierController extends Controller
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    private function resolveAuthMeUrl(): ?string
+    {
+        $baseUrl = (string) config('services.sso.base_url', '');
+        if ($baseUrl === '') {
+            return null;
+        }
+
+        $parts = parse_url($baseUrl);
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        $scheme = strtolower((string) $parts['scheme']);
+        if (! in_array($scheme, ['http', 'https'], true)) {
+            return null;
+        }
+
+        $allowedHosts = config('services.sso.allowed_hosts', []);
+        if (! is_array($allowedHosts)) {
+            return null;
+        }
+
+        $normalizedHosts = array_map(static fn($host) => strtolower((string) $host), $allowedHosts);
+        $host = strtolower((string) $parts['host']);
+
+        if (! in_array($host, $normalizedHosts, true)) {
+            return null;
+        }
+
+        return rtrim($baseUrl, '/') . '/me';
     }
 
     private function roleLabel(?\App\Models\User $user): string
